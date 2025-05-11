@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết Quả Gợi Ý Phim</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Inter', sans-serif;
+        }
+        .movie-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        .header-text {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-6 md:p-10">
+    <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-10 header-text">
+        Phim Gợi Ý Cho User {{ user_id }}
+    </h1>
+    <div class="w-full max-w-4xl">
+        {% if recommendations %}
+            {% for movie in recommendations %}
+                <div class="movie-card bg-gray-800 p-6 rounded-xl shadow-lg mb-6">
+                    <h2 class="text-2xl font-semibold text-white">{{ movie.title }}</h2>
+                    <p class="text-gray-400 mt-2"><span class="font-medium text-gray-300">Thể loại:</span> {{ movie.genres }}</p>
+                    <p class="text-gray-400"><span class="font-medium text-gray-300">Quốc gia:</span> {{ movie.country }}</p>
+                    <p class="text-gray-400"><span class="font-medium text-gray-300">Năm:</span> {{ movie.year }}</p>
+                    <p class="text-gray-400"><span class="font-medium text-gray-300">Độ tuổi:</span> {{ movie.age_rating }}</p>
+                    <p class="text-gray-400"><span class="font-medium text-gray-300">Diễn viên:</span> {{ movie.actors }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-gray-400 text-center p-6">Không tìm thấy phim phù hợp. Hãy thử thay đổi bộ lọc.</div>
+        {% endif %}
+    </div>
+    <a
+        href="/"
+        class="mt-8 text-purple-400 font-semibold text-lg hover:text-purple-300 transition-colors"
+    >
+        Quay Lại Trang Chủ
+    </a>
+</body>
+</html>

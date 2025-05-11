@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Gợi Ý Phim</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Inter', sans-serif;
+        }
+        #filter-panel {
+            transition: all 0.5s ease;
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        #filter-panel.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .search-btn, .filter-btn, .apply-btn {
+            transition: transform 0.2s ease, background-color 0.3s ease;
+        }
+        .search-btn:hover, .filter-btn:hover, .apply-btn:hover {
+            transform: scale(1.05);
+        }
+        .movie-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        .header-text {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-6 md:p-10">
+    <!-- Tiêu đề -->
+    <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-10 header-text animate-pulse">
+        Khám Phá Thế Giới Phim Ảnh
+    </h1>
+
+    <!-- Thanh tìm kiếm và nút tìm kiếm -->
+    <div class="w-full max-w-4xl flex mb-10">
+        <input
+            type="text"
+            id="search-bar"
+            class="w-full p-4 rounded-l-2xl bg-gray-800 text-white border-none focus:outline-none focus:ring-4 focus:ring-purple-500 placeholder-gray-400 text-lg"
+            placeholder="Tìm phim bằng AI (ví dụ: phim hành động 2023)..."
+        >
+        <button
+            id="search-btn"
+            class="search-btn bg-purple-600 text-white px-8 py-4 rounded-r-2xl font-semibold text-lg hover:bg-purple-700"
+        >
+            Tìm Kiếm
+        </button>
+    </div>
+    <div id="search-results" class="w-full max-w-4xl mb-10"></div>
+
+    <!-- Nút bộ lọc và bảng lọc -->
+    <button
+        id="filter-btn"
+        class="filter-btn bg-indigo-600 text-white px-8 py-3 rounded-2xl font-semibold text-lg hover:bg-indigo-700 mb-8"
+    >
+        Bộ Lọc Nâng Cao
+    </button>
+    <div id="filter-panel" class="w-full max-w-4xl bg-gray-800 p-8 rounded-2xl shadow-2xl hidden">
+        <form id="filter-form" action="/recommend" method="POST">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">User ID (1-610)</label>
+                    <input
+                        type="number"
+                        name="user_id"
+                        min="1"
+                        max="610"
+                        required
+                        class="w-full p-3 rounded-lg bg-gray-700 text-white border-none focus:ring-4 focus:ring-indigo-500"
+                    >
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Loại Phim</label>
+                    <select name="movie_type" class="w-full p-3 rounded-lg bg-gray-700 text-white border-none focus:ring-4 focus:ring-indigo-500">
+                        <option value="">Tất cả</option>
+                        <option value="Drama">Phim lẻ</option>
+                        <option value="Series">Phim bộ</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Quốc Gia</label>
+                    <select name="country" class="w-full p-3 rounded-lg bg-gray-700 text-white border-none focus:ring-4 focus:ring-indigo-500">
+                        <option value="">Tất cả</option>
+                        {% for country in countries %}
+                            <option value="{{ country }}">{{ country }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Năm Sản Xuất</label>
+                    <select name="year" class="w-full p-3 rounded-lg bg-gray-700 text-white border-none focus:ring-4 focus:ring-indigo-500">
+                        <option value="">Tất cả</option>
+                        {% for year in years %}
+                            <option value="{{ year }}">{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Độ Tuổi</label>
+                    <select name="age_rating" class="w-full p-3 rounded-lg bg-gray-700 text-white border-none focus:ring-4 focus:ring-indigo-500">
+                        <option value="">Tất cả</option>
+                        {% for rating in age_ratings %}
+                            <option value="{{ rating }}">{{ rating }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Thể Loại</label>
+                    <select name="genre" class="w-full p-3 rounded-lg bg-gray-700 text-white border-none focus:ring-4 focus:ring-indigo-500">
+                        <option value="">Tất cả</option>
+                        {% for genre in genres %}
+                            <option value="{{ genre }}">{{ genre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Diễn Viên</label>
+                    <select name="actor" class="w-full p-3 rounded-lg bg-gray-700 text-white border-none focus:ring-4 focus:ring-indigo-500">
+                        <option value="">Tất cả</option>
+                        {% for actor in actors %}
+                            <option value="{{ actor }}">{{ actor }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <button
+                type="submit"
+                class="apply-btn mt-6 w-full bg-green-600 text-white px-6 py-3 rounded-xl font-semibold text-lg hover:bg-green-700"
+            >
+                Áp Dụng Bộ Lọc
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Toggle bảng lọc với hiệu ứng
+        const filterBtn = document.getElementById('filter-btn');
+        const filterPanel = document.getElementById('filter-panel');
+        filterBtn.addEventListener('click', () => {
+            filterPanel.classList.toggle('hidden');
+            filterPanel.classList.toggle('active');
+        });
+
+        // Tìm kiếm AI
+        const searchBtn = document.getElementById('search-btn');
+        const searchBar = document.getElementById('search-bar');
+        const resultsDiv = document.getElementById('search-results');
+
+        searchBtn.addEventListener('click', async () => {
+            const query = searchBar.value.trim();
+            if (query.length < 3) {
+                resultsDiv.innerHTML = '<div class="text-gray-400 p-4">Vui lòng nhập ít nhất 3 ký tự.</div>';
+                return;
+            }
+
+            resultsDiv.innerHTML = '<div class="text-gray-400 p-4 animate-pulse">Đang tìm kiếm...</div>';
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `query=${encodeURIComponent(query)}`
+                });
+                const results = await response.json();
+                resultsDiv.innerHTML = results.map(result => `
+                    <div class="movie-card bg-gray-800 p-6 rounded-xl shadow-lg mb-4">
+                        <h3 class="text-xl font-semibold text-white">${result.title}</h3>
+                        <p class="text-gray-400 mt-2">${result.description}</p>
+                    </div>
+                `).join('');
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="text-red-400 p-4">Đã có lỗi xảy ra. Vui lòng thử lại.</div>';
+            }
+        });
+    </script>
+</body>
+</html>
